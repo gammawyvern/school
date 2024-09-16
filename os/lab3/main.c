@@ -1,11 +1,10 @@
 #include <stdio.h>
 #include <unistd.h>
+#include <stdlib.h>
+#include <signal.h>
 
 #define READ 0
 #define WRITE 1
-
-#define SIGUSR1 -123
-#define SIGUSR2 -124
 
 void sigHandler(int);
 
@@ -29,12 +28,12 @@ int main() {
     signal(SIGINT, sigHandler);
 
     if(pid == 0) {
-
+       
     } else {
-
+      kill(pid, SIGUSR1);
     }
 }
 
 void sigHandler(int sigNum) {
-    printf();
+    printf("%d\n", sigNum);
 }
