@@ -9,31 +9,36 @@
 void sigHandler(int);
 
 int main() {
-    int pid;
-    int fd[2];
+  int pid;
+  int fd[2];
 
-    if(pipe(fd) != 0) {
-        perror("failed to create pipe");
-        exit(1);
+  if(pipe(fd) != 0) {
+      perror("failed to create pipe");
+      exit(1);
+  }
+
+  pid = fork();
+  if(pid < 0) {
+      perror("failed to fork");
+      exit(1);
+  }
+
+  // Signal Handlers
+  signal(SIGUSR1, sigHandler);
+
+  if(pid == 0) {
+    while(1) {
+      sleep(3);
+      kill(getppid(), SIGUSR1);
     }
-
-    pid = fork();
-    if(pid < 0) {
-        perror("failed to fork");
-        exit(1);
+  } else {
+    while(1) {
+      pause();
     }
-
-
-    // Signal Handlers
-    signal(SIGINT, sigHandler);
-
-    if(pid == 0) {
-       
-    } else {
-      kill(pid, SIGUSR1);
-    }
+  }
 }
 
 void sigHandler(int sigNum) {
-    printf("%d\n", sigNum);
+  printf("%d\n", sigNum);
 }
+
