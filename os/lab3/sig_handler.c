@@ -6,8 +6,6 @@
 void sigHandler(int);
 
 int main() {
-    puts("before signal");
-    sleep(4);
     signal(SIGINT, sigHandler);
     puts("waiting");
     pause();
