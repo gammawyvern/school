@@ -3,55 +3,85 @@
 #include <unistd.h>
 #include <sys/types.h>
 
+#define READ 0
+#define WRITE 1
+
 int id;
 pid_t rootPID;
 int circleSize;
 int fd[2];
+int data;
+
+int apple = 0;
 
 void addCircleNode();
 
 int main() {
-    id = 0;
-    rootPID = getpid();
+  id = 0;
+  rootPID = getpid();
 
-    // Obtain size of node circle
-    while(circleSize <= 1) {
-        puts("Enter valid number of nodes in circle");
-        scanf("%d", &circleSize);
-        while(getchar() != '\n');
+  // Obtain size of node circle
+  while(circleSize <= 1) {
+    puts("Enter valid number of nodes in circle");
+    scanf("%d", &circleSize);
+    while(getchar() != '\n');
+  }
+
+  // Setup circle node tree
+  addCircleNode();
+
+  if(getpid() == rootPID) {
+    apple = 1;
+    data = 200;
+  }
+
+  while(1) {
+    if(apple == 1) {
+      write(fd[WRITE], &data, sizeof(data));
+      apple = 0;
+    } else {
+      read(fd[READ], &data, sizeof(data));
+      printf("[%d]: %d\n", getpid(), data);
+      apple = 1;
     }
+  }
 
-    // Setup circle node tree
-    addCircleNode();
-
-    int received;
-    read(fd[0], &received, sizeof(int));
-
-    return 0;
+  printf("[%d]\n", getpid());
+  return 0;
 }
 
 void addCircleNode() {
-    // Setup pipe per node 
-    if(pipe(fd) != 0) {
-        perror("failed to create pipe");
-        exit(1);
-    }
+  int old_write_fd = fd[WRITE];
+  int old_read_fd = fd[READ];
 
-    // Fork new circle node
-    pid_t pid = fork();
-    if(pid < 0) {
-        perror("failed to fork");
-        exit(1);
-    } else if(pid == 0) {
-        id++;
+  // Setup pipe per node 
+  if(pipe(fd) != 0) {
+    perror("failed to create pipe");
+    exit(1);
+  }
 
-        if(id == circleSize - 1) {
-            // TODO loop pipe back to rootPID
-        } else {
-            addCircleNode();
-        }
+  // Fork new circle node
+  pid_t pid = fork();
+  if(pid < 0) {
+    perror("failed to fork");
+    exit(1);
+  }
+
+  if(pid == 0) {
+    // close(fd[WRITE]);
+
+    id++;
+    if(id == circleSize - 1) {
+      // TODO loop pipe back to rootPID
+      // dup2(, ); // something like this?
     } else {
-        write(fd[1], &id, sizeof(int));
+      addCircleNode();
     }
+
+    // I really don't know
+    // dup2();
+  } else {
+    // close(fd[READ]);
+  }
 }
 
