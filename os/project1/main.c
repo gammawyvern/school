@@ -9,8 +9,12 @@
 struct message {
   int src; // Source node ID
   int dst; // Destination node ID
-  char* message;
-}
+  char* text;
+};
+
+void addRingNodes();
+void createNodeRing();
+void communicate();
 
 int id = 0;
 int circleSize = 0;
@@ -20,9 +24,7 @@ int nextPipe[2];
 int apple = 0;  
 
 struct message* data;
-
-void addRingNodes();
-void createNodeRing();
+char messageText[100];
 
 int main() {
   // Obtain size of node circle
@@ -98,20 +100,34 @@ void addRingNodes() {
 void communicate() {
   while(1) {
     if(apple == 1) {
-      sleep(1); // TODO temp to slowdown output
-      data++;
-      write(nextPipe[WRITE], &data, sizeof(data));
-      printf("[%d] sent: %d\n", id, data);
+      int dstID = -1;
+      printf("Enter message to send:\n\t");
+      fgets(messageText, sizeof(messageText), stdin);
+
+      // Obtain size of node circle
+      while(dstID < 0 || dstID >= circleSize) {
+        printf("Enter destination node id:\n\t"); // TODO add error checking
+        scanf("%d", &dstID);
+        while(getchar() != '\n');
+      }
+      
+      struct message send = {id, dstID, messageText};
+
+      // write(nextPipe[WRITE], &data, sizeof(data));
+      // printf("[%d] sent: %d\n", id, data);
       apple = 0;
     } else {
-      read(lastPipe[READ], &data, sizeof(data));
-      printf("[%d] recieved: %d\n", id, data);
+      sleep(10);
+      // read(lastPipe[READ], &data, sizeof(data));
+      // printf("[%d] recieved: %d\n", id, data);
       apple = 1;
     }
   }
 }
 
-void intHandler(int sigNum) {
+void sendMessage();
 
+void intHandler(int sigNum) {
+  free(data); 
 }
 
