@@ -15,6 +15,7 @@ struct message {
 void addRingNodes();
 void createNodeRing();
 void communicate();
+struct message* createMessage();
 
 int id = 0;
 int circleSize = 0;
@@ -23,13 +24,13 @@ int lastPipe[2];
 int nextPipe[2];
 int apple = 0;  
 
-struct message* data;
+struct message* data = NULL;
 char messageText[100];
 
 int main() {
   // Obtain size of node circle
   while(circleSize <= 1) {
-    puts("Enter valid number of nodes in circle");
+    printf("Enter valid number of nodes in circle: ");
     scanf("%d", &circleSize);
     while(getchar() != '\n');
   }
@@ -50,14 +51,15 @@ void createNodeRing() {
     exit(1);
   }
 
-  // TODO check?
   rootPipe[WRITE] = lastPipe[WRITE];
   rootPipe[READ] = lastPipe[READ];
 
   addRingNodes();
 
+  // Init root node
   if(id == 0) {
     apple = 1;
+    data = createMessage();
   }
 }
 
@@ -77,55 +79,55 @@ void addRingNodes() {
 
   if(pid == 0) {
     id++;
-    // TODO Does this make sense to do this?
-    // Should I use dup() or something?
+
     lastPipe[READ] = nextPipe[READ];
     lastPipe[WRITE] = nextPipe[WRITE];
     
     if(id == circleSize - 1) {
-      // TODO check?
       nextPipe[READ] = rootPipe[READ];
       nextPipe[WRITE] = rootPipe[WRITE];
     } else {
       addRingNodes();
     }
-
-  }
-
-  if(pid > 0){
-    // All parent processes
   }
 }
 
 void communicate() {
   while(1) {
     if(apple == 1) {
-      int dstID = -1;
-      printf("Enter message to send:\n\t");
-      fgets(messageText, sizeof(messageText), stdin);
-
-      // Obtain size of node circle
-      while(dstID < 0 || dstID >= circleSize) {
-        printf("Enter destination node id:\n\t"); // TODO add error checking
-        scanf("%d", &dstID);
-        while(getchar() != '\n');
+      if(data->dst == id) {
+        printf("[%d] recieved message: %s", id, data->text);
+        data = createMessage();
+        write(nextPipe[WRITE], data, sizeof(struct message));
+      } else {
+        write(nextPipe[WRITE], data, sizeof(struct message));
       }
-      
-      struct message send = {id, dstID, messageText};
 
-      // write(nextPipe[WRITE], &data, sizeof(data));
-      // printf("[%d] sent: %d\n", id, data);
       apple = 0;
     } else {
-      sleep(10);
-      // read(lastPipe[READ], &data, sizeof(data));
-      // printf("[%d] recieved: %d\n", id, data);
+      read(lastPipe[READ], data, sizeof(struct message));
       apple = 1;
     }
   }
 }
 
-void sendMessage();
+struct message* createMessage() {
+  int dstID = -1;
+  printf("Enter message to send: ");
+  fgets(messageText, sizeof(messageText), stdin);
+
+  while(dstID < 0 || dstID >= circleSize) {
+    printf("Enter destination node id: ");
+    scanf("%d", &dstID);
+    while(getchar() != '\n');
+  }
+
+  struct message* message = malloc(sizeof(struct message));
+  message->src = id;
+  message->dst = dstID;
+  message->text = messageText;
+  return message;
+}
 
 void intHandler(int sigNum) {
   free(data); 

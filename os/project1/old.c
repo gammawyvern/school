@@ -6,20 +6,27 @@
 #define READ 0
 #define WRITE 1
 
-int id;
-pid_t rootPID;
-int circleSize;
-int fd[2];
-int data;
+struct message {
+  int src; // Source node ID
+  int dst; // Destination node ID
+  char* text;
+};
 
-int apple = 0;
+void addRingNodes();
+void createNodeRing();
+void communicate();
 
-void addCircleNode();
+int id = 0;
+int circleSize = 0;
+int rootPipe[2];
+int lastPipe[2];
+int nextPipe[2];
+int apple = 0;  
+
+struct message* data;
+char messageText[100];
 
 int main() {
-  id = 0;
-  rootPID = getpid();
-
   // Obtain size of node circle
   while(circleSize <= 1) {
     puts("Enter valid number of nodes in circle");
@@ -27,35 +34,36 @@ int main() {
     while(getchar() != '\n');
   }
 
-  // Setup circle node tree
-  addCircleNode();
+  createNodeRing();
+  close(lastPipe[WRITE]);
+  close(nextPipe[READ]);
 
-  if(getpid() == rootPID) {
-    apple = 1;
-    data = 200;
-  }
+  communicate();
 
-  while(1) {
-    if(apple == 1) {
-      write(fd[WRITE], &data, sizeof(data));
-      apple = 0;
-    } else {
-      read(fd[READ], &data, sizeof(data));
-      printf("[%d]: %d\n", getpid(), data);
-      apple = 1;
-    }
-  }
-
-  printf("[%d]\n", getpid());
   return 0;
 }
 
-void addCircleNode() {
-  int old_write_fd = fd[WRITE];
-  int old_read_fd = fd[READ];
+void createNodeRing() {
+  // Create initial pipe for root node to last child
+  if(pipe(lastPipe) != 0) {
+    perror("failed to create pipe");
+    exit(1);
+  }
 
+  // TODO check?
+  rootPipe[WRITE] = lastPipe[WRITE];
+  rootPipe[READ] = lastPipe[READ];
+
+  addRingNodes();
+
+  if(id == 0) {
+    apple = 1;
+  }
+}
+
+void addRingNodes() {
   // Setup pipe per node 
-  if(pipe(fd) != 0) {
+  if(pipe(nextPipe) != 0) {
     perror("failed to create pipe");
     exit(1);
   }
@@ -68,20 +76,57 @@ void addCircleNode() {
   }
 
   if(pid == 0) {
-    // close(fd[WRITE]);
-
     id++;
+    // TODO Does this make sense to do this?
+    // Should I use dup() or something?
+    lastPipe[READ] = nextPipe[READ];
+    lastPipe[WRITE] = nextPipe[WRITE];
+    
     if(id == circleSize - 1) {
-      // TODO loop pipe back to rootPID
-      // dup2(, ); // something like this?
+      // TODO check?
+      nextPipe[READ] = rootPipe[READ];
+      nextPipe[WRITE] = rootPipe[WRITE];
     } else {
-      addCircleNode();
+      addRingNodes();
     }
 
-    // I really don't know
-    // dup2();
-  } else {
-    // close(fd[READ]);
   }
+
+  if(pid > 0){
+    // All parent processes
+  }
+}
+
+void communicate() {
+  while(1) {
+    if(apple == 1) {
+      int dstID = -1;
+      printf("Enter message to send: ");
+      fgets(messageText, sizeof(messageText), stdin);
+
+      // Obtain size of node circle
+      while(dstID < 0 || dstID >= circleSize) {
+        printf("Enter destination node id:\n\t");
+        scanf("%d", &dstID);
+        while(getchar() != '\n');
+      }
+      
+      struct message send = {id, dstID, messageText};
+
+      write(nextPipe[WRITE], &send, sizeof(send));
+      // printf("[%d] sent: %d\n", id, data);
+      apple = 0;
+    } else {
+      struct message recv;
+      read(lastPipe[READ], &recv, sizeof(recv));
+      apple = 1;
+    }
+  }
+}
+
+void sendMessage();
+
+void intHandler(int sigNum) {
+  free(data); 
 }
 
