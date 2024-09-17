@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <string.h>
 
 #define READ 0
 #define WRITE 1
@@ -10,6 +11,7 @@ struct message {
   int src; // Source node ID
   int dst; // Destination node ID
   char* text;
+  size_t len;
 };
 
 void addRingNodes();
@@ -25,7 +27,7 @@ int nextPipe[2];
 int apple = 0;  
 
 struct message* data = NULL;
-char messageText[100];
+char* messageText;
 
 int main() {
   // Obtain size of node circle
@@ -97,7 +99,11 @@ void communicate() {
     if(apple == 1) {
       if(data->dst == id) {
         printf("[%d] recieved message: %s", id, data->text);
+
+        free(data->text);
+        free(data);
         data = createMessage();
+
         write(nextPipe[WRITE], data, sizeof(struct message));
       } else {
         write(nextPipe[WRITE], data, sizeof(struct message));
@@ -113,8 +119,10 @@ void communicate() {
 
 struct message* createMessage() {
   int dstID = -1;
+  size_t msgLen;
+
   printf("Enter message to send: ");
-  fgets(messageText, sizeof(messageText), stdin);
+  getline(&messageText, &msgLen, stdin);
 
   while(dstID < 0 || dstID >= circleSize) {
     printf("Enter destination node id: ");
@@ -125,7 +133,10 @@ struct message* createMessage() {
   struct message* message = malloc(sizeof(struct message));
   message->src = id;
   message->dst = dstID;
-  message->text = messageText;
+  message->text = malloc(msgLen + 1);
+  strcpy(message->text, messageText);
+  message->len = msgLen;
+
   return message;
 }
 
