@@ -7,55 +7,48 @@
 #define WRITE 1
 
 int id;
-pid_t rootPID;
-int circleSize;
-int fd[2];
-int data;
+int circleSize = 4;
+int rootPipe[2];
+int lastPipe[2];
+int nextPipe[2];
 
-int apple = 0;
-
-void addCircleNode();
+void addRingNodes();
+void createNodeRing();
 
 int main() {
   id = 0;
-  rootPID = getpid();
 
-  // Obtain size of node circle
-  while(circleSize <= 1) {
-    puts("Enter valid number of nodes in circle");
-    scanf("%d", &circleSize);
-    while(getchar() != '\n');
-  }
+  createNodeRing();
 
-  // Setup circle node tree
-  addCircleNode();
+  close(lastPipe[WRITE]);
+  close(nextPipe[READ]);
 
-  if(getpid() == rootPID) {
-    apple = 1;
-    data = 200;
-  }
+  printf("[%d]: [%d, %d]\n", id, lastPipe[READ], lastPipe[WRITE]);
+  printf("[%d]: [%d, %d]\n", id, nextPipe[READ], nextPipe[WRITE]);
+  sleep(1);
 
-  while(1) {
-    if(apple == 1) {
-      write(fd[WRITE], &data, sizeof(data));
-      apple = 0;
-    } else {
-      read(fd[READ], &data, sizeof(data));
-      printf("[%d]: %d\n", getpid(), data);
-      apple = 1;
-    }
-  }
-
-  printf("[%d]\n", getpid());
   return 0;
 }
 
-void addCircleNode() {
-  int old_write_fd = fd[WRITE];
-  int old_read_fd = fd[READ];
+void createNodeRing() {
+  // Create initial pipe for root node to last child
+  if(pipe(lastPipe) != 0) {
+    perror("failed to create pipe");
+    exit(1);
+  }
 
+  // TODO check?
+  rootPipe[WRITE] = lastPipe[WRITE];
+  rootPipe[READ] = lastPipe[READ];
+
+  addRingNodes();
+
+  // Finish ring connection
+}
+
+void addRingNodes() {
   // Setup pipe per node 
-  if(pipe(fd) != 0) {
+  if(pipe(nextPipe) != 0) {
     perror("failed to create pipe");
     exit(1);
   }
@@ -68,20 +61,24 @@ void addCircleNode() {
   }
 
   if(pid == 0) {
-    // close(fd[WRITE]);
-
     id++;
+    // TODO Does this make sense to do this?
+    // Should I use dup() or something?
+    lastPipe[READ] = nextPipe[READ];
+    lastPipe[WRITE] = nextPipe[WRITE];
+    
     if(id == circleSize - 1) {
-      // TODO loop pipe back to rootPID
-      // dup2(, ); // something like this?
+      // TODO check?
+      nextPipe[READ] = rootPipe[READ];
+      nextPipe[WRITE] = rootPipe[WRITE];
     } else {
-      addCircleNode();
+      addRingNodes();
     }
 
-    // I really don't know
-    // dup2();
-  } else {
-    // close(fd[READ]);
+  }
+
+  if(pid > 0){
+    // All parent processes
   }
 }
 
