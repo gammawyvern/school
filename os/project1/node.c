@@ -31,9 +31,12 @@ void createNodeRing() {
 
   addRingNodes();
 
+  printf("New pipe: [%d %d]\n", nextPipe[READ], nextPipe[WRITE]);
+  sleep(0.5);
+
   close(lastPipe[WRITE]);
   close(nextPipe[READ]);
-  sleep(10);
+  sleep(3);
   printf("id[%d] read[%d] write[%d]\n", id, lastPipe[READ], nextPipe[WRITE]);
   sleep(1);
 
@@ -50,9 +53,6 @@ void addRingNodes() {
     perror("failed to create pipe");
     exit(1);
   }
-
-  printf("New pipe: [%d %d]\n", nextPipe[READ], nextPipe[WRITE]);
-  sleep(0.5);
 
   // Fork new circle node
   pid_t pid = fork();

@@ -12,10 +12,8 @@ char* messageText = NULL;
 void communicate() {
   while(1) {
     if(apple == 1) {
-      printf("[%d] recieved message: %s", id, data->text);
-
-      printf("%d %d\n", data->dst, id);
       if(data->dst == id) {
+        printf("[%d] recieved message: %s", id, data->text);
         free(data->text);
         free(data);
 
