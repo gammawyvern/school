@@ -1,0 +1,14 @@
+2. What output do you get?
+  For me, it usually prints out main 0-19, and then happy 0-5.
+  However, the order of print outs can be different every time you run it.
+  The happy thread is being run in parallel with the main thread, so the 
+  output depends on how they are scheudled to run in parallel by the os.
+
+3. Change happy to print 10 times.
+  We can just change threadArgument to 10.
+
+4. Change thread return value
+  It seems like we can return anything as long as it is a void*, or cast
+  to a void*. Ideally this should probably be some status code or something,
+  but we can return any void* value we want, just like a normal function.
+
