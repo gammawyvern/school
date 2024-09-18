@@ -12,24 +12,26 @@ char* messageText = NULL;
 void communicate() {
   while(1) {
     if(apple == 1) {
-      if(data->dst == id) {
-        printf("[%d] recieved message: %s", id, data->text);
+      printf("[%d] recieved message: %s", id, data->text);
 
+      printf("%d %d\n", data->dst, id);
+      if(data->dst == id) {
         free(data->text);
         free(data);
 
         data = createMessage();
       }
 
+      printf("Forwarding data");
       write(nextPipe[WRITE], data, sizeof(struct message));
-      write(nextPipe[WRITE], data->text, data->len);
+      // write(nextPipe[WRITE], data->text, data->len);
 
       apple = 0;
     } else {
       read(lastPipe[READ], data, sizeof(struct message));
-      data->text = malloc(data->len + 1); // add +1 for \0
-      read(lastPipe[READ], data->text, data->len);
-      data->text[data->len] = '\0';
+      // data->text = malloc(data->len + 1); // add +1 for \0
+      // read(lastPipe[READ], data->text, data->len);
+      // data->text[data->len] = '\0';
 
       apple = 1;
     }
@@ -60,11 +62,9 @@ struct message* createMessage() {
 
   message->src = id;
   message->dst = dstID;
+  message->len = msgLen;
   message->text = malloc(msgLen + 1);
   strcpy(message->text, tmpText);
-  message->len = msgLen;
-
-  printf("Length of text: %d\n", msgLen);
 
   return message;
 }
