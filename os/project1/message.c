@@ -29,6 +29,9 @@ void communicate() {
 struct message createMessage() {
   struct message msg;
 
+  printf("Enter message: ");
+  getline();
+
   int dstID = -1;
   while(dstID < 0 || dstID >= circleSize) {
     printf("[%d] Enter destination node id: ", id);

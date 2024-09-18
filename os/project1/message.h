@@ -8,6 +8,8 @@
 struct message {
   int src; // Source node ID
   int dst; // Destination node ID
+  int text;
+  int len; // Length of text
 };
 
 void communicate();
