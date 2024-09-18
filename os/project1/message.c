@@ -37,7 +37,7 @@ void communicate() {
 }
 
 struct message* createMessage() {
-  struct message* message = malloc(sizeof(struct message));
+  struct message* msg = malloc(sizeof(struct message));
 
   char* tmpText = NULL;
   int dstID = -1;
@@ -58,13 +58,13 @@ struct message* createMessage() {
     while(getchar() != '\n');
   }
 
-  message->src = id;
-  message->dst = dstID;
-  message->len = msgLen;
-  message->text = malloc(msgLen + 1);
-  strcpy(message->text, tmpText);
+  msg->src = id;
+  msg->dst = dstID;
+  msg->len = msgLen;
+  msg->text = malloc(msgLen + 1);
+  strcpy(msg->text, tmpText);
 
-  return message;
+  return msg;
 }
 
 void intHandler(int sigNum) {
