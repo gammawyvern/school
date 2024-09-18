@@ -8,13 +8,10 @@
 struct message {
   int src; // Source node ID
   int dst; // Destination node ID
-  char* text;
-  size_t len;
 };
 
 void communicate();
-struct message* createMessage();
+struct message createMessage();
 
-extern struct message* data;
-extern char* messageText;
+extern struct message data;
 

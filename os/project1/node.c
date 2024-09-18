@@ -20,9 +20,17 @@ void createNodeRing() {
     while(getchar() != '\n');
   }
 
+  // Setup pipe per node 
+  if(pipe(lastPipe) != 0) {
+    perror("failed to create pipe");
+    exit(1);
+  }
+  rootPipe[READ] = lastPipe[READ];
+  rootPipe[WRITE] = lastPipe[WRITE];
+
   addRingNodes();
-  // close(lastPipe[WRITE]);
-  // close(nextPipe[READ]);
+  close(lastPipe[WRITE]);
+  close(nextPipe[READ]);
 
   // Init root node
   if(id == 0) {
@@ -52,8 +60,8 @@ void addRingNodes() {
     lastPipe[WRITE] = nextPipe[WRITE];
     
     if(id == circleSize - 1) {
-      // nextPipe[READ] = rootPipe[READ];
-      // nextPipe[WRITE] = rootPipe[WRITE];
+      nextPipe[READ] = rootPipe[READ];
+      nextPipe[WRITE] = rootPipe[WRITE];
     } else {
       addRingNodes();
     }

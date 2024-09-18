@@ -6,68 +6,39 @@
 #include "node.h"
 #include "message.h"
 
-struct message* data = NULL;
-char* messageText = NULL;
+struct message data;
 
 void communicate() {
   while(1) {
     if(apple == 1) {
-      if(data->dst == id) {
-        printf("[%d] recieved message: %s", id, data->text);
-        free(data->text);
-        free(data);
-
+      if(data.dst == id) {
+        printf("[%d] recieved message from [%d]\n", id, data.src);
         data = createMessage();
       }
 
-      printf("Forwarding data");
-      write(nextPipe[WRITE], data, sizeof(struct message));
-      // write(nextPipe[WRITE], data->text, data->len);
-
+      printf("[%d] forwarding message to [%d]\n", id, data.dst);
+      write(nextPipe[WRITE], &data, sizeof(struct message));
       apple = 0;
     } else {
-      read(lastPipe[READ], data, sizeof(struct message));
-      // data->text = malloc(data->len + 1); // add +1 for \0
-      // read(lastPipe[READ], data->text, data->len);
-      // data->text[data->len] = '\0';
-
+      read(lastPipe[READ], &data, sizeof(struct message));
       apple = 1;
     }
   }
 }
 
-struct message* createMessage() {
-  struct message* msg = malloc(sizeof(struct message));
+struct message createMessage() {
+  struct message msg;
 
-  char* tmpText = NULL;
   int dstID = -1;
-  size_t bufferSize = 0;
-  size_t msgLen = 0;
-
-  printf("Enter message to send: ");
-  msgLen = getline(&tmpText, &bufferSize, stdin);
-  // Remove newline from message
-  if(tmpText[msgLen - 1] == '\n') {
-    tmpText[msgLen - 1] == '\0';
-    msgLen--;
-  }
-
   while(dstID < 0 || dstID >= circleSize) {
-    printf("Enter destination node id: ");
+    printf("[%d] Enter destination node id: ", id);
     scanf("%d", &dstID);
     while(getchar() != '\n');
   }
 
-  msg->src = id;
-  msg->dst = dstID;
-  msg->len = msgLen;
-  msg->text = malloc(msgLen + 1);
-  strcpy(msg->text, tmpText);
+  msg.src = id;
+  msg.dst = dstID;
 
   return msg;
-}
-
-void intHandler(int sigNum) {
-  free(data); 
 }
 
