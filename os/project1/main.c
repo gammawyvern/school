@@ -3,7 +3,7 @@
 
 int main() {
   createNodeRing();
-  // communicate();
+  communicate();
   return 0;
 }
 
