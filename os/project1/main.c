@@ -4,6 +4,7 @@
 int main() {
   createNodeRing();
   communicate();
+
   return 0;
 }
 
