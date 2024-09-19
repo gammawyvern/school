@@ -16,7 +16,7 @@ void createNodeRing() {
 
   // Obtain size of node circle
   while(circleSize <= 1) {
-    printf("Enter valid number of nodes in circle: ");
+    printf("Enter number of nodes in circle: ");
     scanf("%d", &circleSize);
     while(getchar() != '\n');
   }
