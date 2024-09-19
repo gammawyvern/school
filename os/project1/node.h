@@ -6,6 +6,9 @@
 void addRingNodes();
 void createNodeRing();
 
+void intHandler(int);
+void stopHandler(int);
+
 extern int id;
 extern int circleSize;
 extern int rootPipe[2];

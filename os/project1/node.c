@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <signal.h>
+#include <sys/wait.h>
 
 #include "node.h"
 #include "message.h"
@@ -13,6 +15,8 @@ int nextPipe[2];
 int apple = 0;  
 
 void createNodeRing() {
+  signal(SIGINT, intHandler);
+
   // Obtain size of node circle
   while(circleSize <= 1) {
     printf("Enter valid number of nodes in circle: ");
@@ -69,4 +73,16 @@ void addRingNodes() {
       addRingNodes();
     }
   }
+}
+
+void intHandler(int sigNum) {
+  int status;
+  wait(&status);
+
+  free(data.text);
+  close(lastPipe[READ]);
+  close(nextPipe[WRITE]);
+  printf("\n[%d]\t| Process pid[%d] shutting down...", id, getpid());
+  if(id == 0) { printf("\n"); }
+  exit(0);
 }
