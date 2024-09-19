@@ -9,9 +9,9 @@
 struct message data;
 
 void communicate() {
-  read(lastPipe[READ], &data, sizeof(struct message));
+  read(nodePipe[READ], &data, sizeof(struct message));
   data.text = malloc(data.len);
-  read(lastPipe[READ], data.text, data.len);
+  read(nodePipe[READ], data.text, data.len);
 
   if(data.dst == id) {
     printf("[%d]\t| Recieved message from [%d]: %s\n", id, data.src, data.text);
@@ -21,8 +21,8 @@ void communicate() {
   }
 
   printf("[%d]\t| Forwarding message headed to [%d]\n", id, data.dst);
-  write(nextPipe[WRITE], &data, sizeof(struct message));
-  write(nextPipe[WRITE], data.text, data.len);
+  write(nodePipe[WRITE], &data, sizeof(struct message));
+  write(nodePipe[WRITE], data.text, data.len);
 
   communicate();
 }
