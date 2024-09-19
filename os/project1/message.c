@@ -58,6 +58,8 @@ struct message createMessage() {
   msg.len = textLen;
   msg.text = malloc(msg.len); 
   strcpy(msg.text, tmpText);
+  // Needed??
+  free(tmpText);
 
   return msg;
 }
