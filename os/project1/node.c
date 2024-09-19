@@ -34,8 +34,9 @@ void createNodeRing() {
 
   // Init root node
   if(id == 0) {
-    apple = 1;
     data = createMessage();
+    write(nextPipe[WRITE], &data, sizeof(struct message));
+    write(nextPipe[WRITE], data.text, data.len);
   }
 }
 
