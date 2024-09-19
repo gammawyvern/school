@@ -20,7 +20,7 @@ void communicate() {
     free(oldText);
   }
 
-  printf("[%d]\t| Forwarding message headed to [%d]\n", id, data.dst);
+  printf("[%d]\t| Forwarding recieved message headed to [%d]\n", id, data.dst);
   write(nodePipe[WRITE], &data, sizeof(struct message));
   write(nodePipe[WRITE], data.text, data.len);
 
