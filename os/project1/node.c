@@ -56,6 +56,7 @@ void addRingNodes() {
 
   if(pid == 0) {
     id++;
+    printf("[%d] | Child pid[%d] created\n", id, getpid());
 
     lastPipe[READ] = nextPipe[READ];
     lastPipe[WRITE] = nextPipe[WRITE];

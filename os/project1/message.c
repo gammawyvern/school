@@ -12,13 +12,13 @@ void communicate() {
   while(1) {
     if(apple == 1) {
       if(data.dst == id) {
-        printf("[%d] recieved message from [%d]: %s\n", id, data.src, data.text);
+        printf("[%d] | Recieved message from [%d]: %s\n", id, data.src, data.text);
         free(data.text);
 
         data = createMessage();
       }
 
-      printf("[%d] forwarding message to [%d]\n", id, data.dst);
+      printf("[%d] | Forwarding message headed to [%d]\n", id, data.dst);
       write(nextPipe[WRITE], &data, sizeof(struct message));
       write(nextPipe[WRITE], data.text, data.len);
       apple = 0;
@@ -36,7 +36,7 @@ struct message createMessage() {
 
   char* tmpText = NULL;
   size_t bufferSize = 0;
-  printf("[%d] Enter message: ", id);
+  printf("[%d] | Enter message: ", id);
   size_t textLen = getline(&tmpText, &bufferSize, stdin);
 
   if(tmpText[textLen - 1] == '\n') {
@@ -46,7 +46,7 @@ struct message createMessage() {
 
   int dstID = -1;
   while(dstID < 0 || dstID >= circleSize) {
-    printf("[%d] Enter destination node id: ", id);
+    printf("[%d] | Enter destination node id: ", id);
     scanf("%d", &dstID);
     while(getchar() != '\n');
   }
