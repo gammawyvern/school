@@ -29,31 +29,22 @@ void communicate() {
 
 struct message createMessage() {
   struct message msg;
+  msg.src = id;
 
-  char* tmpText = NULL;
   size_t bufferSize = 0;
   printf("[%d]\t| Enter message: ", id);
-  size_t textLen = getline(&tmpText, &bufferSize, stdin);
-
-  if(tmpText[textLen - 1] == '\n') {
-    tmpText[textLen - 1] = '\0';
-    textLen--;
+  msg.len = getline(&msg.text, &bufferSize, stdin);
+  if(msg.text[msg.len - 1] == '\n') {
+    msg.text[msg.len - 1] = '\0';
+    msg.len--;
   }
 
-  int dstID = -1;
-  while(dstID < 0 || dstID >= circleSize) {
+  msg.dst = -1;
+  while(msg.dst < 0 || msg.dst >= circleSize) {
     printf("[%d]\t| Enter destination node id: ", id);
-    scanf("%d", &dstID);
+    scanf("%d", &msg.dst);
     while(getchar() != '\n');
   }
-
-  msg.src = id;
-  msg.dst = dstID;
-  msg.len = textLen;
-  msg.text = malloc(msg.len); 
-  strcpy(msg.text, tmpText);
-  // Needed??
-  free(tmpText);
 
   return msg;
 }
