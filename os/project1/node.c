@@ -12,7 +12,6 @@ int circleSize = 0;
 int rootPipe[2];
 int lastPipe[2];
 int nextPipe[2];
-int apple = 0;  
 
 void createNodeRing() {
   signal(SIGINT, intHandler);

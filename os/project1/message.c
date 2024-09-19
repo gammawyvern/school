@@ -9,28 +9,22 @@
 struct message data;
 
 void communicate() {
-  while(1) {
-    if(apple == 1) {
-      if(data.dst == id) {
-        printf("[%d]\t| Recieved message from [%d]: %s\n", id, data.src, data.text);
+  read(lastPipe[READ], &data, sizeof(struct message));
+  data.text = malloc(data.len);
+  read(lastPipe[READ], data.text, data.len);
 
-        // Avoiding double free() issue
-        char* oldText = data.text;
-        data = createMessage();
-        free(oldText);
-      }
-
-      printf("[%d]\t| Forwarding message headed to [%d]\n", id, data.dst);
-      write(nextPipe[WRITE], &data, sizeof(struct message));
-      write(nextPipe[WRITE], data.text, data.len);
-      apple = 0;
-    } else {
-      read(lastPipe[READ], &data, sizeof(struct message));
-      data.text = malloc(data.len);
-      read(lastPipe[READ], data.text, data.len);
-      apple = 1;
-    }
+  if(data.dst == id) {
+    printf("[%d]\t| Recieved message from [%d]: %s\n", id, data.src, data.text);
+    char* oldText = data.text;
+    data = createMessage();
+    free(oldText);
   }
+
+  printf("[%d]\t| Forwarding message headed to [%d]\n", id, data.dst);
+  write(nextPipe[WRITE], &data, sizeof(struct message));
+  write(nextPipe[WRITE], data.text, data.len);
+
+  communicate();
 }
 
 struct message createMessage() {

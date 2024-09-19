@@ -14,5 +14,4 @@ extern int circleSize;
 extern int rootPipe[2];
 extern int lastPipe[2];
 extern int nextPipe[2];
-extern int apple;  
 
