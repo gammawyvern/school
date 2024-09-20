@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+  <title>3D Sierpinski Gasket</title>
+  <link rel="stylesheet" type="text/css" href="../style.css">
+
+  <script id="vertex-shader" type="x-shader/x-vertex">
+    attribute vec4 vPosition;
+    uniform float rotation;
+    varying float position;
+
+    void main() {
+      position = 2.0 * sin(vPosition.x * vPosition.x);
+
+      mat2 rotation_matrix = mat2(cos(rotation), -sin(rotation), sin(rotation), cos(rotation));
+      vec2 rotated_position = rotation_matrix * vPosition.xy;
+      gl_Position = vec4(rotated_position, 0.0, 1.5);
+    }
+  </script>
+
+  <script id="fragment-shader" type="x-shader/x-fragment">
+    precision mediump float;
+    varying float position;
+
+    void main() {
+      gl_FragColor = vec4(0.0, position, 0.8, 1.0);
+      // gl_FragColor = vec4(0.0, 0.6, 0.95, 1.0);
+    }
+  </script>
+
+  <script type="text/javascript" src="../libraries/Common/webgl-utils.js"></script>
+  <script type="text/javascript" src="../libraries/Common/initShaders.js"></script>
+  <script type="text/javascript" src="../libraries//Common/MV.js"></script>
+  <script type="text/javascript" src="./gasket-extended.js"></script>
+</head>
+
+<body>
+  <canvas id="gl-canvas" width="512" height="512">
+    Oops ... your browser doesn't support the HTML5 canvas element
+  </canvas>
+</body>
+</html>
