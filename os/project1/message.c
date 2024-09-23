@@ -15,14 +15,14 @@ void communicate() {
 
   if(data.dst == id) {
     printf("[%d]\t| Recieved message from [%d]: %s\n", id, data.src, data.text);
-    char* oldText = data.text;
+    free(data.text);
     data = createMessage();
-    free(oldText);
   }
 
   printf("[%d]\t| Forwarding recieved message headed to [%d]\n", id, data.dst);
   write(nodePipe[WRITE], &data, sizeof(struct message));
   write(nodePipe[WRITE], data.text, data.len);
+  free(data.text);
 
   communicate();
 }
