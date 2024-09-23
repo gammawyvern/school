@@ -34,6 +34,7 @@ void createNodeRing() {
     data = createMessage();
     write(nodePipe[WRITE], &data, sizeof(struct message));
     write(nodePipe[WRITE], data.text, data.len);
+    free(data.text);
   }
 }
 
@@ -67,7 +68,6 @@ void intHandler(int sigNum) {
   int status;
   wait(&status);
 
-  free(data.text);
   close(nodePipe[READ]);
   close(nodePipe[WRITE]);
   printf("\n[%d]\t| Process pid[%d] shutting down...", id, getpid());
