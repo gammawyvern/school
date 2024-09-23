@@ -29,13 +29,15 @@ void communicate() {
 
 struct message createMessage() {
   struct message msg;
+  char tmpText[120];
   msg.src = id;
 
-  size_t bufferSize = 0;
   printf("[%d]\t| Enter message: ", id);
-  msg.len = getline(&msg.text, &bufferSize, stdin);
-  if(msg.text[msg.len - 1] == '\n') {
-    msg.text[msg.len - 1] = '\0';
+  fgets(tmpText, sizeof(tmpText), stdin);
+
+  msg.len = strlen(tmpText);
+  if(msg.len > 0 && tmpText[msg.len - 1] == '\n') {
+    tmpText[msg.len - 1] = '\0';
     msg.len--;
   }
 
@@ -45,6 +47,9 @@ struct message createMessage() {
     scanf("%d", &msg.dst);
     while(getchar() != '\n');
   }
+
+  msg.text = malloc(msg.len);
+  strcpy(msg.text, tmpText);
 
   return msg;
 }
