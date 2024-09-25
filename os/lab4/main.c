@@ -13,6 +13,7 @@ void* worker(void*);
 void intHandler(int);
 
 int file_requests = 0;
+// Redundant since we wait for each worker to finish
 int file_accesses = 0;
 int active_threads = 0;
 int accepting_requests = 1;
