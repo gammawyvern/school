@@ -31,6 +31,8 @@ void createNodeRing() {
 
   // Init root node
   if(id == 0) {
+    // Wait for last node to be created
+    read(nodePipe[READ], &data, sizeof(struct message));
     data = createMessage();
     write(nodePipe[WRITE], &data, sizeof(struct message));
     write(nodePipe[WRITE], data.text, data.len);
@@ -54,8 +56,11 @@ void addRingNodes(int rootWrite) {
   if(pid == 0) {
     id++;
 
+    printf("[%d]\t| Child process pid[%d] created\n", id, getpid());
     if(id == circleSize - 1) {
       nodePipe[WRITE] = rootWrite;
+      // Let root wait so prints out in order
+      write(nodePipe[WRITE], &data, sizeof(struct message));
     } else {
       addRingNodes(rootWrite);
     }
@@ -74,3 +79,4 @@ void intHandler(int sigNum) {
   if(id == 0) { printf("\n"); }
   exit(0);
 }
+
