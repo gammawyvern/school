@@ -31,6 +31,7 @@ int main() {
   }
 
   int join_status = pthread_join(thread, &result);
+  free(result);
 
   return 0;
 }
@@ -45,9 +46,11 @@ void* dispatch(void* argument) {
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 
-  while(accepting_requests) {
+  while(accepting_requests != 0) {
     printf("Please enter next file to search for...\n");
     fgets(file_name, MAX_FILENAME_LEN, stdin);
+
+    if(accepting_requests == 0) { break; }
     file_name[strcspn(file_name, "\n")] = '\0';
     char* file_name_arg = malloc(strlen(file_name) + 1); 
     strcpy(file_name_arg, file_name);
