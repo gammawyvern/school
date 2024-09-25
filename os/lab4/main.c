@@ -24,36 +24,38 @@ int main() {
   pthread_t thread;
   void* result;
   int thread_status;
-  int join_status;
 
   thread_status = pthread_create(&thread, NULL, dispatch, NULL);
   if(thread_status != 0) {
     perror("Failed to create dispatcher");
   }
 
-  join_status = pthread_join(thread, &result);
+  int join_status = pthread_join(thread, &result);
 
   return 0;
 }
 
 void* dispatch(void* argument) {
   char file_name[MAX_FILENAME_LEN];
+  pthread_t thread;
+  void* result;
+  int thread_status;
+
+  pthread_attr_t attr;
+  pthread_attr_init(&attr);
+  pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 
   while(accepting_requests) {
-    pthread_t thread;
-    void* result;
-    int thread_status;
-
     printf("Please enter next file to search for...\n");
     fgets(file_name, MAX_FILENAME_LEN, stdin);
     file_name[strcspn(file_name, "\n")] = '\0';
     char* file_name_arg = malloc(strlen(file_name) + 1); 
     strcpy(file_name_arg, file_name);
 
-    thread_status = pthread_create(&thread, NULL, worker, file_name_arg);
+
+    thread_status = pthread_create(&thread, &attr, worker, file_name_arg);
     if(thread_status != 0) {
       perror("Failed to process request");
-      free(file_name_arg);
     } else {
       active_threads++;
       file_requests++;
@@ -82,12 +84,12 @@ void* worker(void* argument) {
 }
 
 void intHandler(int sigNum) {
-  printf("\nShutting down. Waiting for current outgoing requests...\n");
-  accepting_requests = 0;
-  while(active_threads > 0);
+  if(accepting_requests != 0) {
+    printf("\nShutting down. Waiting for current outgoing requests...\n");
+    accepting_requests = 0;
+    while(active_threads > 0);
 
-  printf("\nTotal number of file requests: %d\n", file_requests);
-  printf("Actual number of files accessed: %d\n", file_accesses);
-  exit(0);
+    printf("\nTotal number of file requests: %d\n", file_requests);
+    printf("Actual number of files accessed: %d\n", file_accesses);
+  }
 }
-
