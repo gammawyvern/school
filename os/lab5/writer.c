@@ -31,8 +31,6 @@ int main() {
     exit(1);
   }
 
-  sleep(10);
-
   if(shmdt(shm_addr) < 0) {
     perror("Failed to detach memory.");
     exit(1);
