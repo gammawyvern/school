@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/ipc.h>
@@ -28,6 +29,8 @@ int main () {
   struct shmid_ds shm_info;
   shmctl(shmId, IPC_STAT, &shm_info);
   printf("Amount of memory allocated: %d\n", shm_info.shm_segsz);
+  printf("ID: %d\n", shmId);
+  sleep(10);
 
   if(shmdt(sharedMemoryPtr) < 0) {
     perror("Unable to detach\n");
