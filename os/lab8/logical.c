@@ -6,7 +6,7 @@ int one();
 int two();
 
 int initialized_1 = 50; // Initialized data
-int initialized_2 = 20;
+int initialized_2 = 20; // Initialized data
 
 int uninitialized_1; // Static data
 int uninitialized_2; // Static data
