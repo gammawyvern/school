@@ -1,5 +1,0 @@
-
-0    11959              11971                         27381879614023      41632035650219    41632035650247
-|      |                  |                                  |                        |       |
-| Text | Initialized Data | Uninitialized Data | ? | Shared Libraries |  <--  Stack  <--  |  -->  Heap  -->  |
-
