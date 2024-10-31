@@ -64,7 +64,7 @@ int main() {
 }
 
 long offset(void* main_addr, void* next_addr) {
-  return (long)(next_addr - main_addr);
+  return next_addr - main_addr;
 }
 
 void recurse(int num, void* last_addr) {
