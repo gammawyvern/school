@@ -9,6 +9,11 @@ Baker create_baker(Kitchen* kitchen, int id) {
 
   set_color(&baker);
 
+  Ingredient recipe[2] = {
+    (Ingredient) {.name = "Flour", .location = baker.kitchen->pantry},
+    (Ingredient) {.name = "Eggs", .location = baker.kitchen->refrigerator}
+  };
+
   return baker;
 }
 
