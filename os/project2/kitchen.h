@@ -12,8 +12,8 @@ typedef struct {
 } Kitchen;
 
 typedef struct {
-  char* name;
-  sem_t location;
+  const char* name;
+  sem_t* location;
   int obtained;
 } Ingredient;
 
