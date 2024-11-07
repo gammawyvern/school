@@ -24,10 +24,9 @@ int main(int argc, char* argv[]) {
   Baker bakers[num_of_bakers];
 
   for (unsigned long id=0; id<num_of_bakers; id++) {
-    bakers[id].id = id;
-    bakers[id].kitchen = &kitchen;
+    bakers[id] = create_baker(&kitchen, id);
 
-    int result = pthread_create(&baker_threads[id], NULL, create_baker, &bakers[id]);
+    int result = pthread_create(&baker_threads[id], NULL, run_baker_thread, &bakers[id]);
     if (result != 0) {
       perror("Failed to create thread");
       return 1;

@@ -9,7 +9,11 @@
 typedef struct {
   Kitchen* kitchen;
   unsigned long id;
+  unsigned char color[3];
 } Baker;
 
-void* create_baker(void* arg);
+Baker create_baker(Kitchen*, int);
+void set_color(Baker*);
+void print_baker_message(Baker*, char*);
+void* run_baker_thread(void*);
 
