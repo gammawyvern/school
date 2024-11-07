@@ -14,6 +14,7 @@ typedef struct {
 typedef struct {
   char* name;
   sem_t* location;
+  int obtained;
 } Ingredient;
 
 typedef struct {
