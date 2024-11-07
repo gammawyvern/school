@@ -43,22 +43,100 @@ void print_baker_message(Baker* baker, char* message) {
 void* run_baker_thread(void* arg) {
   Baker* baker = (Baker*)arg;
 
-  Ingredient cookies[4] = {
-    (Ingredient) {.name = "Flour", .location = &baker->kitchen->pantry},
-    (Ingredient) {.name = "Eggs", .location = &baker->kitchen->refrigerator},
-    (Ingredient) {.name = "Sugar", .location = &baker->kitchen->pantry},
-    (Ingredient) {.name = "Milk", .location = &baker->kitchen->refrigerator}
+  Recipe recipes[] = {
+    (Recipe) {
+      .name = "Cookies",
+      .num_of_ingredients = 4,
+      .ingredients = {
+        {.name = "Flour", .location = &baker->kitchen->pantry},
+        {.name = "Sugar", .location = &baker->kitchen->pantry},
+        {.name = "Eggs", .location = &baker->kitchen->refrigerator},
+        {.name = "Milk", .location = &baker->kitchen->refrigerator}
+      }
+    },
+    (Recipe) {
+      .name = "Pancakes",
+      .num_of_ingredients = 7,
+      .ingredients = {
+        {.name = "Flour", .location = &baker->kitchen->pantry},
+        {.name = "Sugar", .location = &baker->kitchen->pantry},
+        {.name = "Baking Soda", .location = &baker->kitchen->pantry},
+        {.name = "Salt", .location = &baker->kitchen->pantry},
+        {.name = "Eggs", .location = &baker->kitchen->refrigerator},
+        {.name = "Milk", .location = &baker->kitchen->refrigerator},
+        {.name = "Butter", .location = &baker->kitchen->refrigerator}
+      }
+    },
+    (Recipe) {
+      .name = "Pizza Dough",
+      .num_of_ingredients = 3,
+      .ingredients = {
+        {.name = "Yeast", .location = &baker->kitchen->pantry},
+        {.name = "Sugar", .location = &baker->kitchen->pantry},
+        {.name = "Salt", .location = &baker->kitchen->pantry}
+      }
+    },
+    (Recipe) {
+      .name = "Soft Pretzels",
+      .num_of_ingredients = 6,
+      .ingredients = {
+        {.name = "Flour", .location = &baker->kitchen->pantry},
+        {.name = "Sugar", .location = &baker->kitchen->pantry},
+        {.name = "Salt", .location = &baker->kitchen->pantry},
+        {.name = "Yeast", .location = &baker->kitchen->pantry},
+        {.name = "Baking Soda", .location = &baker->kitchen->pantry},
+        {.name = "Eggs", .location = &baker->kitchen->refrigerator},
+      }
+    },
+    (Recipe) {
+      .name = "Cinnamon Rolls",
+      .num_of_ingredients = 6,
+      .ingredients = {
+        {.name = "Flour", .location = &baker->kitchen->pantry},
+        {.name = "Sugar", .location = &baker->kitchen->pantry},
+        {.name = "Salt", .location = &baker->kitchen->pantry},
+        {.name = "Butter", .location = &baker->kitchen->refrigerator},
+        {.name = "Eggs", .location = &baker->kitchen->refrigerator},
+        {.name = "Cinnamon", .location = &baker->kitchen->pantry}
+      }
+    },
   };
 
-  for(int ing=0; ing<4; ing++) {
-    char message[100];
-    sprintf(message, "Grabbing %s", cookies[ing].name);
+  char message[100];
+  for(int rec=0; rec<5; rec++) {
+    for(int ing=0; ing<recipes[rec].num_of_ingredients; ing++) {
+      sprintf(message, "Grabbing %s", recipes[rec].ingredients[ing].name);
 
-    sem_wait(cookies[ing].location);
+      sem_wait(recipes[rec].ingredients[ing].location);
+      print_baker_message(baker, message);
+      sem_post(recipes[rec].ingredients[ing].location);
+    }
+
+    sem_wait(&baker->kitchen->spoon);
+    print_baker_message(baker, "Grabbing spoon");
+
+    sem_wait(&baker->kitchen->bowl);
+    print_baker_message(baker, "Grabbing bowl");
+
+    sem_wait(&baker->kitchen->mixer);
+    print_baker_message(baker, "Grabbing mixer");
+
+    print_baker_message(baker, "Mixed ingredients");
+
+    sem_wait(&baker->kitchen->oven);
+    print_baker_message(baker, "Using oven");
+
+    // TODO should spoon/mixer move above?
+    sem_post(&baker->kitchen->spoon);
+    sem_post(&baker->kitchen->bowl);
+    sem_post(&baker->kitchen->mixer);
+    sem_post(&baker->kitchen->oven);
+
+    sprintf(message, "Finished creating %s", recipes[rec].name);
     print_baker_message(baker, message);
-    sleep(2);
-    sem_post(cookies[ing].location);
   }
+
+  print_baker_message(baker, "FINISHED");
 
   return NULL;
 }

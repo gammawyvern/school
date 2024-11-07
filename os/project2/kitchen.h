@@ -14,11 +14,12 @@ typedef struct {
 typedef struct {
   const char* name;
   sem_t* location;
-  int obtained;
 } Ingredient;
 
 typedef struct {
-  Ingredient* ingredients;
+  const char* name;
+  Ingredient ingredients[10];
+  int num_of_ingredients;
 } Recipe;
 
 void setup_kitchen(Kitchen* kitchen);
