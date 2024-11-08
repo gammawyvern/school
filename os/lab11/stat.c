@@ -17,13 +17,13 @@ int main(int argc, char *argv[]) {
   }
 
   if(S_ISDIR(statBuf.st_mode)) {
-    printf("Is a directory.\n");
+    printf("is a directory\n");
   } else {
-    printf("Is not a directory.\n");
+    printf("is not a directory\n");
   }
 
   printf("value is: %u\n", statBuf.st_mode);
-  printf("inode value is: %lu\n", statBuf.st_ino);
+  printf("inode value is: %u\n", statBuf.st_ino);
   return 0;
 }
 
