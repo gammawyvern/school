@@ -22,7 +22,12 @@ int main() {
     }
 
     stat(entryPtr->d_name, &statBuf);
-    printf("%-10s(%d bytes)\n", entryPtr->d_name, statBuf.st_size);
+    char* name = entryPtr->d_name;
+    uid_t uid = statBuf.st_uid;
+    gid_t gid = statBuf.st_gid;
+    ino_t ino = statBuf.st_ino;
+
+    printf("%u %u %8u %s\n", uid, gid, ino, name);
   }
 
   closedir (dirPtr);
