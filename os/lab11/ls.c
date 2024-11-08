@@ -6,12 +6,22 @@
 #include <errno.h>
 #include <stdlib.h>
 
-int main() {
+int main(int argc, char *argv[]) {
   DIR *dirPtr;
   struct stat statBuf;
   struct dirent *entryPtr;
 
-  dirPtr = opendir("./");
+  if (argc < 2) {
+    printf("Usage: argument (filename) expected\n");
+    exit(1);
+  }
+
+  dirPtr = opendir(argv[1]);
+  if (dirPtr == 0) {
+    perror("Invalid directory");
+    exit(1);
+  }
+
   while((entryPtr = readdir(dirPtr))) {
     if (strcmp(entryPtr->d_name, ".") == 0) {
       continue;

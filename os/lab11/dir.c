@@ -22,7 +22,7 @@ int main() {
     }
 
     stat(entryPtr->d_name, &statBuf);
-    printf("%-10s(%d bytes)\n", entryPtr->d_name, statBuf.st_size);
+    printf("%-10s(%u bytes)\n", entryPtr->d_name, statBuf.st_size);
   }
 
   closedir (dirPtr);
