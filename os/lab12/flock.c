@@ -27,12 +27,24 @@ int main(int argc, char *argv[]) {
   fileLock.l_start = 0;
   fileLock.l_len = 0;
 
-  if (fcntl (fd, F_SETLK, &fileLock) < 0) {
-    perror ("Unable to set file lock");
+  if (fcntl(fd, F_SETLKW, &fileLock) < 0) {
+    perror("Unable to set file lock");
     exit (1);
   }
 
   write(fd, myBuffer, SIZE-2);
+  printf("Simulating using file for 5 seconds\n");
+  sleep(5);
+
+  fileLock.l_type = F_UNLCK;
+
+  if (fcntl(fd, F_SETLK, &fileLock) < 0) {
+    perror("Unable to release file lock");
+    exit(1);
+  }
+
+  printf("Finished, released file lock\n");
+
   close(fd);
   return 0;
 }
