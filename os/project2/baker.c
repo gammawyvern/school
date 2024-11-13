@@ -45,6 +45,30 @@ void print_baker_message(Baker* baker, char* message) {
   printf("%s", formatted_message);
 }
 
+void randomize_recipes(Recipe* recipes, size_t size) {
+  struct timespec time;
+  clock_gettime(CLOCK_REALTIME, &time);
+  srand(time.tv_nsec);
+
+  // Randomize order of each recipe
+  for (int rec=size-1; rec>0; rec--) {
+    // Also, first randomize recipe order of ingredients
+    for (size_t ing=recipes[rec].num_of_ingredients-1; ing>0; ing--) {
+      size_t rand_ing = rand() % (rec + 1);
+
+      Ingredient temp = recipes[rec].ingredients[ing];
+      recipes[rec].ingredients[ing] = recipes[rec].ingredients[rand_ing]; 
+      recipes[rec].ingredients[rand_ing] = temp;
+    }
+
+    size_t rand_rec = rand() % (rec + 1);
+
+    Recipe temp = recipes[rec];
+    recipes[rec] = recipes[rand_rec]; 
+    recipes[rand_rec] = temp;
+  }
+}
+
 void* run_baker_thread(void* arg) {
   Baker* baker = (Baker*)arg;
 
@@ -107,6 +131,8 @@ void* run_baker_thread(void* arg) {
     },
   };
 
+  randomize_recipes(recipes, sizeof(recipes) / sizeof(Recipe));
+
   char message[100];
   for(int rec=0; rec<5; rec++) {
     for(int ing=0; ing<recipes[rec].num_of_ingredients; ing++) {
@@ -126,7 +152,7 @@ void* run_baker_thread(void* arg) {
     sem_wait(&baker->kitchen->mixer);
     print_baker_message(baker, "Grabbing mixer");
 
-    print_baker_message(baker, "Mixed ingredients");
+    print_baker_message(baker, "Mixing ingredients");
 
     sem_wait(&baker->kitchen->oven);
     print_baker_message(baker, "Using oven");
