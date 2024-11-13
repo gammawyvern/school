@@ -46,13 +46,15 @@ int main(int argc, char* argv[]) {
   }
 
   size_t* finish_order = get_finish_order(finish_times, num_of_bakers);
-  printf("\nBaker [%lu] won!\n\n", finish_order[0]);
+  printf("\nBaker [%lu] won!\n", finish_order[0]);
+  printf("Finish order: ");
+  for (size_t id=0; id<num_of_bakers; id++) {
+    printf("%lu ", finish_order[id]);
+    free(finish_times[id]);
+  } printf("\n");
 
   free(finish_order);
   cleanup_kitchen(&kitchen);
-  for (size_t id=0; id<num_of_bakers; id++) {
-    free(finish_times[id]);
-  }
 
   return 0;
 }
