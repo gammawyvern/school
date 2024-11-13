@@ -8,25 +8,19 @@ Baker create_baker(Kitchen* kitchen, int id) {
   };
 
   set_color(&baker);
-
   return baker;
 }
 
 void set_color(Baker* baker) {
   unsigned char color[] = {255, 255, 255};
-  unsigned int hash = baker->id * 0x517cc1b7;
+  size_t hash = rand() * 0x517cc1b7;
 
   color[0] = (hash & 0xFF0000) >> 16;
   color[1] = (hash & 0x00FF00) >> 8;
   color[2] = (hash & 0x0000FF);
 
-  unsigned char min_value = 50;
+  unsigned char min_value = 55;
   for(int channel=0; channel<3; channel++) {
-    if(color[channel] == 0) {
-      color[channel] = min_value;
-      continue;
-    }
-
     float percent = (float)color[channel] / 255.0f;
     color[channel] = min_value + ((255 - min_value) * percent);
     baker->color[channel] = color[channel];
@@ -46,13 +40,9 @@ void print_baker_message(Baker* baker, char* message) {
 }
 
 void randomize_recipes(Recipe* recipes, size_t size) {
-  struct timespec time;
-  clock_gettime(CLOCK_REALTIME, &time);
-  srand(time.tv_nsec);
-
   // Randomize order of each recipe
   for (int rec=size-1; rec>0; rec--) {
-    // Also, first randomize recipe order of ingredients
+    // Also, first randomize each recipe's order of ingredients
     for (size_t ing=recipes[rec].num_of_ingredients-1; ing>0; ing--) {
       size_t rand_ing = rand() % (rec + 1);
 
@@ -71,6 +61,12 @@ void randomize_recipes(Recipe* recipes, size_t size) {
 
 void* run_baker_thread(void* arg) {
   Baker* baker = (Baker*)arg;
+  char message[100];
+  struct timespec* finish_time = malloc(sizeof(struct timespec));
+
+  struct timespec time;
+  clock_gettime(CLOCK_REALTIME, &time);
+  srand(time.tv_nsec);
 
   Recipe recipes[] = {
     (Recipe) {
@@ -133,7 +129,6 @@ void* run_baker_thread(void* arg) {
 
   randomize_recipes(recipes, sizeof(recipes) / sizeof(Recipe));
 
-  char message[100];
   for(int rec=0; rec<5; rec++) {
     for(int ing=0; ing<recipes[rec].num_of_ingredients; ing++) {
       sprintf(message, "Grabbing %s", recipes[rec].ingredients[ing].name);
@@ -167,8 +162,6 @@ void* run_baker_thread(void* arg) {
     print_baker_message(baker, message);
   }
 
-  // time_t finish_time = time(NULL);
-  struct timespec* finish_time = malloc(sizeof(struct timespec));
   clock_gettime(CLOCK_REALTIME, finish_time);
   print_baker_message(baker, "FINISHED");
   
