@@ -6,7 +6,7 @@
 #include "kitchen.h"
 #include "baker.h"
 
-size_t get_winner(time_t* finish_times, size_t size);
+size_t get_winner(struct timespec** finish_times, size_t size);
 
 int main(int argc, char* argv[]) {
   if (argc != 2) {
@@ -36,9 +36,11 @@ int main(int argc, char* argv[]) {
     }
   }
 
-  time_t finish_times[num_of_bakers];
+  struct timespec* finish_times[num_of_bakers];
   for (unsigned long id=0; id<num_of_bakers; id++) {
-    pthread_join(baker_threads[id], (void*)&finish_times[id]);
+    void* return_time;
+    pthread_join(baker_threads[id], &return_time);
+    finish_times[id] = (struct timespec*)return_time;
   }
 
   size_t winner = get_winner(finish_times, num_of_bakers);
@@ -48,14 +50,26 @@ int main(int argc, char* argv[]) {
   return 0;
 }
 
-size_t get_winner(time_t* finish_times, size_t size) {
-  size_t winner_index = 0;
-  for (size_t i=0; i<size; i++) {
-    if (finish_times[i] < finish_times[winner_index]) {
-      winner_index = i;
+size_t get_winner(struct timespec** finish_times, size_t size) {
+  size_t winner_id = 0;
+  for (size_t id=0; id<size; id++) {
+    if (finish_times[id]->tv_sec == finish_times[winner_id]->tv_sec) {
+      if (finish_times[id]->tv_nsec <= finish_times[winner_id]->tv_nsec) {
+        winner_id = id;
+        continue;
+      }
     }
+
+    if (finish_times[id]->tv_sec < finish_times[winner_id]->tv_sec) {
+      winner_id = id;
+      continue;
+    }
+
+    // baker was not faster
+    free(finish_times[id]);
   }
 
-  return winner_index;
+  free(finish_times[winner_id]);
+  return winner_id;
 }
 

@@ -141,8 +141,11 @@ void* run_baker_thread(void* arg) {
     print_baker_message(baker, message);
   }
 
+  // time_t finish_time = time(NULL);
+  struct timespec* finish_time = malloc(sizeof(struct timespec));
+  clock_gettime(CLOCK_REALTIME, finish_time);
   print_baker_message(baker, "FINISHED");
-
-  return (void*)time(NULL);
+  
+  return (void*)finish_time;
 }
 
