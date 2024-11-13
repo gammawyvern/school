@@ -34,10 +34,15 @@ void set_color(Baker* baker) {
 }
 
 void print_baker_message(Baker* baker, char* message) {
-  printf("\033[38;2;%d;%d;%dm", baker->color[0], baker->color[1], baker->color[2]);
-  printf("\033[48;2;%d;%d;%dm", 5, 5, 5);
-  printf("[%lu] %s", baker->id, message);
-  printf("\033[0m\n");
+  char formatted_message[124];
+  snprintf(
+    formatted_message, sizeof(formatted_message),
+    "\033[38;2;%d;%d;%dm\033[48;2;5;5;5m[%lu] %s\033[0m\n",
+    baker->color[0], baker->color[1], baker->color[2],
+    baker->id, message
+  );
+
+  printf("%s", formatted_message);
 }
 
 void* run_baker_thread(void* arg) {
