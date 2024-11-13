@@ -143,6 +143,6 @@ void* run_baker_thread(void* arg) {
 
   print_baker_message(baker, "FINISHED");
 
-  return NULL;
+  return (void*)time(NULL);
 }
 
