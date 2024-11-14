@@ -8,25 +8,19 @@ Baker create_baker(Kitchen* kitchen, int id) {
   };
 
   set_color(&baker);
-
   return baker;
 }
 
 void set_color(Baker* baker) {
   unsigned char color[] = {255, 255, 255};
-  unsigned int hash = baker->id * 0x517cc1b7;
+  size_t hash = rand() * 0x517cc1b7;
 
   color[0] = (hash & 0xFF0000) >> 16;
   color[1] = (hash & 0x00FF00) >> 8;
   color[2] = (hash & 0x0000FF);
 
-  unsigned char min_value = 50;
+  unsigned char min_value = 55;
   for(int channel=0; channel<3; channel++) {
-    if(color[channel] == 0) {
-      color[channel] = min_value;
-      continue;
-    }
-
     float percent = (float)color[channel] / 255.0f;
     color[channel] = min_value + ((255 - min_value) * percent);
     baker->color[channel] = color[channel];
@@ -34,14 +28,45 @@ void set_color(Baker* baker) {
 }
 
 void print_baker_message(Baker* baker, char* message) {
-  printf("\033[38;2;%d;%d;%dm", baker->color[0], baker->color[1], baker->color[2]);
-  printf("\033[48;2;%d;%d;%dm", 5, 5, 5);
-  printf("[%lu] %s", baker->id, message);
-  printf("\033[0m\n");
+  char formatted_message[124];
+  snprintf(
+    formatted_message, sizeof(formatted_message),
+    "\033[38;2;%d;%d;%dm\033[48;2;5;5;5m[%lu] %s\033[0m\n",
+    baker->color[0], baker->color[1], baker->color[2],
+    baker->id, message
+  );
+
+  printf("%s", formatted_message);
+}
+
+void randomize_recipes(Recipe* recipes, size_t size) {
+  // Randomize order of each recipe
+  for (int rec=size-1; rec>0; rec--) {
+    // Also, first randomize each recipe's order of ingredients
+    for (size_t ing=recipes[rec].num_of_ingredients-1; ing>0; ing--) {
+      size_t rand_ing = rand() % (rec + 1);
+
+      Ingredient temp = recipes[rec].ingredients[ing];
+      recipes[rec].ingredients[ing] = recipes[rec].ingredients[rand_ing]; 
+      recipes[rec].ingredients[rand_ing] = temp;
+    }
+
+    size_t rand_rec = rand() % (rec + 1);
+
+    Recipe temp = recipes[rec];
+    recipes[rec] = recipes[rand_rec]; 
+    recipes[rand_rec] = temp;
+  }
 }
 
 void* run_baker_thread(void* arg) {
   Baker* baker = (Baker*)arg;
+  char message[100];
+  struct timespec* finish_time = malloc(sizeof(struct timespec));
+
+  struct timespec time;
+  clock_gettime(CLOCK_REALTIME, &time);
+  srand(time.tv_nsec);
 
   Recipe recipes[] = {
     (Recipe) {
@@ -102,7 +127,8 @@ void* run_baker_thread(void* arg) {
     },
   };
 
-  char message[100];
+  randomize_recipes(recipes, sizeof(recipes) / sizeof(Recipe));
+
   for(int rec=0; rec<5; rec++) {
     for(int ing=0; ing<recipes[rec].num_of_ingredients; ing++) {
       sprintf(message, "Grabbing %s", recipes[rec].ingredients[ing].name);
@@ -121,7 +147,7 @@ void* run_baker_thread(void* arg) {
     sem_wait(&baker->kitchen->mixer);
     print_baker_message(baker, "Grabbing mixer");
 
-    print_baker_message(baker, "Mixed ingredients");
+    print_baker_message(baker, "Mixing ingredients");
 
     sem_wait(&baker->kitchen->oven);
     print_baker_message(baker, "Using oven");
@@ -136,8 +162,9 @@ void* run_baker_thread(void* arg) {
     print_baker_message(baker, message);
   }
 
+  clock_gettime(CLOCK_REALTIME, finish_time);
   print_baker_message(baker, "FINISHED");
-
-  return NULL;
+  
+  return (void*)finish_time;
 }
 
