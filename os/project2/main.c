@@ -10,6 +10,8 @@
 
 size_t* get_finish_order(struct timespec** finish_times, size_t size);
 
+size_t ramsy;
+
 int main(int argc, char* argv[]) {
   if (argc != 2) {
     printf("Usage: ./a.out num_of_bakers\n");
@@ -23,6 +25,7 @@ int main(int argc, char* argv[]) {
   }
 
   srand(time(NULL));
+  ramsy = rand() % num_of_bakers;
 
   Kitchen kitchen;
   setup_kitchen(&kitchen);

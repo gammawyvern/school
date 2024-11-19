@@ -129,6 +129,14 @@ void* run_baker_thread(void* arg) {
 
   randomize_recipes(recipes, sizeof(recipes) / sizeof(Recipe));
 
+  size_t reset = -1;
+  if (baker->id == ramsy) {
+    float reset_recipe = (float)rand() / (float)RAND_MAX;
+    reset = (int)(5 * reset_recipe);
+  }
+
+start_baking:
+
   for(int rec=0; rec<5; rec++) {
     for(int ing=0; ing<recipes[rec].num_of_ingredients; ing++) {
       sprintf(message, "Grabbing %s", recipes[rec].ingredients[ing].name);
@@ -136,6 +144,13 @@ void* run_baker_thread(void* arg) {
       sem_wait(recipes[rec].ingredients[ing].location);
       print_baker_message(baker, message);
       sem_post(recipes[rec].ingredients[ing].location);
+    }
+
+    // Don't kill me for this unholy label usage
+    if (rec == reset) {
+      print_baker_message(baker, "RAMSIED!");
+      reset = -1;
+      goto start_baking;
     }
 
     sem_wait(&baker->kitchen->spoon);
@@ -149,13 +164,12 @@ void* run_baker_thread(void* arg) {
 
     print_baker_message(baker, "Mixing ingredients");
 
+    sem_post(&baker->kitchen->spoon);
+    sem_post(&baker->kitchen->mixer);
+
     sem_wait(&baker->kitchen->oven);
     print_baker_message(baker, "Using oven");
-
-    // TODO should spoon/mixer move above?
-    sem_post(&baker->kitchen->spoon);
     sem_post(&baker->kitchen->bowl);
-    sem_post(&baker->kitchen->mixer);
     sem_post(&baker->kitchen->oven);
 
     sprintf(message, "Finished creating %s", recipes[rec].name);

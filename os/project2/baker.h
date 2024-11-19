@@ -20,3 +20,5 @@ void print_baker_message(Baker*, char*);
 void randomize_recipes(Recipe* recipes, size_t size);
 void* run_baker_thread(void*);
 
+extern size_t ramsy;
+
