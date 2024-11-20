@@ -146,7 +146,7 @@ start_baking:
       sem_post(recipes[rec].ingredients[ing].location);
     }
 
-    // Don't kill me for this unholy label usage
+    // Don't kill me for this unholy goto / label usage
     if (rec == reset) {
       print_baker_message(baker, "RAMSIED!");
       reset = -1;

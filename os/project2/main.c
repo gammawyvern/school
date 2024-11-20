@@ -8,6 +8,7 @@
 #include "kitchen.h"
 #include "baker.h"
 
+int compare_time(const void* a, const void* b, void* finish_times);
 size_t* get_finish_order(struct timespec** finish_times, size_t size);
 
 size_t ramsy;
