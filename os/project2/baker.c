@@ -135,8 +135,6 @@ void* run_baker_thread(void* arg) {
     reset = (int)(5 * reset_recipe);
   }
 
-start_baking:
-
   for(int rec=0; rec<5; rec++) {
     for(int ing=0; ing<recipes[rec].num_of_ingredients; ing++) {
       sprintf(message, "Grabbing %s", recipes[rec].ingredients[ing].name);
@@ -146,11 +144,11 @@ start_baking:
       sem_post(recipes[rec].ingredients[ing].location);
     }
 
-    // Don't kill me for this unholy goto / label usage
     if (rec == reset) {
       print_baker_message(baker, "RAMSIED!");
       reset = -1;
-      goto start_baking;
+      rec--;
+      continue;
     }
 
     sem_wait(&baker->kitchen->spoon);
